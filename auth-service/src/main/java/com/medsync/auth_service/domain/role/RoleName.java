@@ -4,5 +4,5 @@ public enum RoleName {
     PATIENT,
     DOCTOR,
     CLINIC_ADMIN,
-    SYSTEM_ADMIN
+    SYSTEM_ADMIN;
 }
