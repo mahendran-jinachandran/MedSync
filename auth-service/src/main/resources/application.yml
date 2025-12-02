@@ -24,4 +24,4 @@ spring:
 
 jwt:
   secret: "change-this-secret-in-prod-its-very-important"
-  access-token-expiration-seconds: 1800   # 30 minutes
+  access-token-expiration-seconds: 3600   # 30 minutes

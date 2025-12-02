@@ -1,0 +1,57 @@
+package com.medsync.patient_service.application.patient;
+
+import com.medsync.patient_service.api.exception.PatientAlreadyExistsException;
+import com.medsync.patient_service.api.exception.PatientNotFoundException;
+import com.medsync.patient_service.domain.patient.Gender;
+import com.medsync.patient_service.domain.patient.Patient;
+import com.medsync.patient_service.domain.patient.PatientRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class PatientService {
+
+    private final PatientRepository repository;
+
+    public PatientService(PatientRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional
+    public Patient createPatient(PatientCreateCommand cmd) {
+        if (repository.existsByUserId(cmd.userId())) {
+            throw new PatientAlreadyExistsException(cmd.userId());
+        }
+
+        Patient patient = Patient.newPatient(
+                cmd.userId(),
+                cmd.fullName(),
+                cmd.dateOfBirth(),
+                cmd.gender(),
+                cmd.phone(),
+                cmd.address(),
+                cmd.allergies(),
+                cmd.chronicConditions()
+        );
+
+        return repository.save(patient);
+    }
+
+    @Transactional(readOnly = true)
+    public Patient getByUserId(Long userId) {
+        return repository.findByUserId(userId)
+                .orElseThrow(() -> new PatientNotFoundException(userId));
+    }
+
+    @Transactional
+    public Patient updateForUser(Long userId, PatientUpdateCommand cmd) {
+        Patient patient = repository.findByUserId(userId)
+                .orElseThrow(() -> new PatientNotFoundException(userId));
+
+        patient.updatePersonalInfo(cmd.fullName(), cmd.dateOfBirth(), cmd.gender());
+        patient.updateContactInfo(cmd.phone(), cmd.address());
+        patient.updateMedicalInfo(cmd.allergies(), cmd.chronicConditions());
+
+        return repository.save(patient);
+    }
+}
