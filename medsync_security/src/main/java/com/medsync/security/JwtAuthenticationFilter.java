@@ -1,4 +1,4 @@
-package com.medsync.auth_service.infrastructure.security;
+package com.medsync.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,9 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (header != null && header.startsWith("Bearer ")) {
+
             String token = header.substring(7);
 
             if (tokenProvider.validateToken(token)) {
+
                 Long userId = tokenProvider.getUserId(token);
                 String email = tokenProvider.getEmail(token);
                 Set<String> roles = tokenProvider.getRoles(token);
@@ -43,8 +45,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .collect(Collectors.toSet());
 
                 var authentication = new UsernamePasswordAuthenticationToken(
-                        email, null, authorities
+                        email,
+                        null,
+                        authorities
                 );
+
                 authentication.setDetails(userId);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);

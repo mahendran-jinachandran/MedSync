@@ -1,16 +1,16 @@
 package com.medsync.auth_service.application.auth;
 
-
 import com.medsync.auth_service.api.exception.InvalidCredentialsException;
 import com.medsync.auth_service.api.exception.UserAlreadyExistsException;
 import com.medsync.auth_service.domain.role.RoleName;
 import com.medsync.auth_service.domain.user.User;
 import com.medsync.auth_service.domain.user.UserRepository;
-import com.medsync.auth_service.infrastructure.security.JwtTokenProvider;
+import com.medsync.security.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -45,10 +45,15 @@ public class AuthService {
 
         User saved = userRepository.save(newUser);
 
+        // convert roles to Set<String> for shared JwtTokenProvider
+        Set<String> roleNames = saved.getRoles().stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+
         String token = tokenProvider.generateAccessToken(
                 saved.getId(),
                 saved.getEmail(),
-                saved.getRoles()
+                roleNames
         );
 
         return new AuthResult(
@@ -68,10 +73,14 @@ public class AuthService {
             throw new InvalidCredentialsException();
         }
 
+        Set<String> roleNames = user.getRoles().stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+
         String token = tokenProvider.generateAccessToken(
                 user.getId(),
                 user.getEmail(),
-                user.getRoles()
+                roleNames
         );
 
         return new AuthResult(
@@ -83,4 +92,3 @@ public class AuthService {
         );
     }
 }
-

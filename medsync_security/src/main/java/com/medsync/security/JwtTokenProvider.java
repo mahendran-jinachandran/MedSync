@@ -1,7 +1,5 @@
-package com.medsync.auth_service.infrastructure.security;
+package com.medsync.security;
 
-
-import com.medsync.auth_service.domain.role.RoleName;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -16,20 +14,19 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private final JwtProperties properties;
-    private final Key key;
+    private Key key;
 
     public JwtTokenProvider(JwtProperties properties) {
         this.properties = properties;
         this.key = Keys.hmacShaKeyFor(properties.getSecret().getBytes());
     }
 
-    public String generateAccessToken(Long userId, String email, Set<RoleName> roles) {
+    public String generateAccessToken(Long userId, String email, Set<String> roles) {
+
         Instant now = Instant.now();
         Instant expiry = now.plusSeconds(properties.getAccessTokenExpirationSeconds());
 
-        String rolesString = roles.stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(","));
+        String rolesString = roles.stream().collect(Collectors.joining(","));
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
@@ -56,17 +53,13 @@ public class JwtTokenProvider {
     }
 
     public String getEmail(String token) {
-        Claims claims = getClaims(token);
-        return claims.get("email", String.class);
+        return getClaims(token).get("email", String.class);
     }
 
     public Set<String> getRoles(String token) {
-        Claims claims = getClaims(token);
-        String rolesString = claims.get("roles", String.class);
-        if (rolesString == null || rolesString.isBlank()) {
-            return Set.of();
-        }
-        return Set.of(rolesString.split(","));
+        String value = getClaims(token).get("roles", String.class);
+        if (value == null || value.isBlank()) return Set.of();
+        return Set.of(value.split(","));
     }
 
     private Claims getClaims(String token) {
@@ -77,4 +70,3 @@ public class JwtTokenProvider {
                 .getBody();
     }
 }
-
