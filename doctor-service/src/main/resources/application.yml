@@ -1,0 +1,29 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: doctor-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medsync_doctor
+    username: postgres
+    password: Jarvis@29    # same as your others
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+
+jwt:
+  secret: "change-this-secret-in-prod-its-very-important"
+  access-token-expiration-seconds: 3600
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.medsync.doctor_service: DEBUG

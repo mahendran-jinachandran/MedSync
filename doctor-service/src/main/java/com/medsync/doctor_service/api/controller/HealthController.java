@@ -1,0 +1,13 @@
+package com.medsync.doctor_service.api.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HealthController {
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "doctor-service-ok";
+    }
+}
