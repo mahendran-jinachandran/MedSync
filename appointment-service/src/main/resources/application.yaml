@@ -1,0 +1,29 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: appointment-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medsync_appointment
+    username: postgres
+    password: Jarvis@29
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+
+jwt:
+  secret: "change-this-secret-in-prod-its-very-important"
+  access-token-expiration-seconds: 3600
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.medsync.appointment_service: DEBUG
