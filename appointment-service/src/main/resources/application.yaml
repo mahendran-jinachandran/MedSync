@@ -19,6 +19,12 @@ spring:
         format_sql: true
         show_sql: false
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 jwt:
   secret: "change-this-secret-in-prod-its-very-important"
   access-token-expiration-seconds: 3600
@@ -27,3 +33,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     com.medsync.appointment_service: DEBUG
+
+medsync:
+  kafka:
+    appointments-topic: appointment-events

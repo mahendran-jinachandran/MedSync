@@ -15,16 +15,18 @@ import java.util.List;
 public class AppointmentService {
 
     private final AppointmentRepository repository;
+    private final AppointmentEventPublisher eventPublisher;
 
-    public AppointmentService(AppointmentRepository repository) {
+    public AppointmentService(AppointmentRepository repository,
+                              AppointmentEventPublisher eventPublisher) {
         this.repository = repository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
     public Appointment createAppointment(AppointmentCreateCommand cmd) {
         validateTimes(cmd.startTime(), cmd.endTime());
 
-        // check overlapping for doctor
         if (repository.existsOverlappingForDoctor(cmd.doctorId(), cmd.startTime(), cmd.endTime())) {
             throw new OverlappingAppointmentException(cmd.doctorId());
         }
@@ -37,18 +39,28 @@ public class AppointmentService {
                 cmd.reason()
         );
 
-        return repository.save(appt);
+        Appointment saved = repository.save(appt);
+
+        // publish Kafka event
+        eventPublisher.publishAppointmentCreated(saved);
+
+        return saved;
     }
+
 
     @Transactional
     public Appointment cancelAppointment(AppointmentCancelCommand cmd) {
         Appointment appt = repository.findById(cmd.appointmentId())
                 .orElseThrow(() -> new AppointmentNotFoundException(cmd.appointmentId()));
 
-        // in a more advanced version, we'd also verify patientId matches
         appt.cancel();
-        return repository.save(appt);
+        Appointment saved = repository.save(appt);
+
+        eventPublisher.publishAppointmentCancelled(saved);
+
+        return saved;
     }
+
 
     @Transactional
     public Appointment rescheduleAppointment(AppointmentRescheduleCommand cmd) {
@@ -57,14 +69,18 @@ public class AppointmentService {
         Appointment appt = repository.findById(cmd.appointmentId())
                 .orElseThrow(() -> new AppointmentNotFoundException(cmd.appointmentId()));
 
-        // check overlapping for doctor with new times
         if (repository.existsOverlappingForDoctor(appt.getDoctorId(), cmd.newStartTime(), cmd.newEndTime())) {
             throw new OverlappingAppointmentException(appt.getDoctorId());
         }
 
         appt.reschedule(cmd.newStartTime(), cmd.newEndTime());
-        return repository.save(appt);
+        Appointment saved = repository.save(appt);
+
+        eventPublisher.publishAppointmentRescheduled(saved);
+
+        return saved;
     }
+
 
     @Transactional(readOnly = true)
     public Appointment getById(Long id) {
