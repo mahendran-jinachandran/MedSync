@@ -17,5 +17,4 @@ public class AppointmentEvent {
     private Instant endTime;
     private String status;
     private String reason;
-
 }

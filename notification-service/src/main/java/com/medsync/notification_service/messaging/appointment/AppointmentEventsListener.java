@@ -1,7 +1,6 @@
 package com.medsync.notification_service.messaging.appointment;
 
 import com.medsync.notification_service.application.appointment.AppointmentNotificationService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,7 @@ public class AppointmentEventsListener {
 
     @KafkaListener(
             topics = "${medsync.kafka.appointments-topic}",
-            containerFactory = "appointmentEventKafkaListenerContainerFactory"
+            groupId = "notification-service"
     )
     public void onAppointmentEvent(@Payload AppointmentEvent event) {
         notificationService.handleEvent(event);
