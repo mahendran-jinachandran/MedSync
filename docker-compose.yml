@@ -24,17 +24,30 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: medsync-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Jarvis@29
+      # Default DB = "postgres"; we'll create others manually
+    ports:
+      - "5433:5432"
+    volumes:
+      - medsync-postgres-data:/var/lib/postgresql/data
+
   auth-service:
     build: ./auth-service
     container_name: medsync-auth-service
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/medsync_auth
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_auth
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Jarvis@29
     depends_on:
       - kafka
+      - postgres
 
   patient-service:
     build: ./patient-service
@@ -42,11 +55,12 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/medsync_patient
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_patient
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Jarvis@29
     depends_on:
       - auth-service
+      - postgres
 
   doctor-service:
     build: ./doctor-service
@@ -54,12 +68,12 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/medsync_doctor
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_doctor
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Jarvis@29
     depends_on:
       - auth-service
-
+      - postgres
 
   appointment-service:
     build: ./appointment-service
@@ -67,14 +81,14 @@ services:
     ports:
       - "8084:8084"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/medsync_appointment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_appointment
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Jarvis@29
-      # Kafka bootstrap servers - VERY IMPORTANT, this must match how Kafka is exposed
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       - auth-service
       - kafka
+      - postgres
 
   notification-service:
     build: ./notification-service
@@ -85,3 +99,6 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       - kafka
+
+volumes:
+  medsync-postgres-data:
