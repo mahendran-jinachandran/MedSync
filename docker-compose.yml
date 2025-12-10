@@ -39,8 +39,8 @@ services:
   auth-service:
     build: ./auth-service
     container_name: medsync-auth-service
-    ports:
-      - "8081:8081"
+#    ports: # UNCOMMENT THEM TO EXPOSE THEM SEPARATELY
+#      - "8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_auth
       SPRING_DATASOURCE_USERNAME: postgres
@@ -52,8 +52,8 @@ services:
   patient-service:
     build: ./patient-service
     container_name: medsync-patient-service
-    ports:
-      - "8082:8082"
+#    ports: # UNCOMMENT THEM TO EXPOSE THEM SEPARATELY
+#      - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_patient
       SPRING_DATASOURCE_USERNAME: postgres
@@ -65,8 +65,8 @@ services:
   doctor-service:
     build: ./doctor-service
     container_name: medsync-doctor-service
-    ports:
-      - "8083:8083"
+#    ports: // UNCOMMENT THEM TO EXPOSE THEM SEPARATELY
+#      - "8083:8083"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_doctor
       SPRING_DATASOURCE_USERNAME: postgres
@@ -78,8 +78,8 @@ services:
   appointment-service:
     build: ./appointment-service
     container_name: medsync-appointment-service
-    ports:
-      - "8084:8084"
+#    ports: // UNCOMMENT THEM TO EXPOSE THEM SEPARATELY
+#      - "8084:8084"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/medsync_appointment
       SPRING_DATASOURCE_USERNAME: postgres
@@ -93,8 +93,8 @@ services:
   notification-service:
     build: ./notification-service
     container_name: medsync-notification-service
-    ports:
-      - "8085:8085"
+#    ports: // UNCOMMENT THEM TO EXPOSE THEM SEPARATELY
+#      - "8085:8085"
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
