@@ -33,7 +33,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/ping").permitAll()
+                        .requestMatchers("/patients/ping").permitAll()
                         .requestMatchers("/debug/**").permitAll()   // add this line
                         .requestMatchers(HttpMethod.POST, "/patients").authenticated()
                         .requestMatchers(HttpMethod.GET, "/patients/me").authenticated()
