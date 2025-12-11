@@ -4,6 +4,7 @@ import com.medsync.patient_service.domain.patient.Patient;
 import com.medsync.patient_service.domain.patient.PatientRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -35,5 +36,18 @@ public class PatientRepositoryImpl implements PatientRepository {
         PatientEntity entity = PatientMapper.toEntity(patient);
         PatientEntity saved = jpaRepository.save(entity);
         return PatientMapper.toDomain(saved);
+    }
+
+    @Override
+    public List<Patient> getAll() {
+        return jpaRepository.findAll()
+                .stream()
+                .map(PatientMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Patient getById(Long userId) {
+        return null;
     }
 }

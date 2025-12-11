@@ -8,10 +8,12 @@ import com.medsync.patient_service.application.patient.PatientUpdateCommand;
 import com.medsync.patient_service.domain.patient.Gender;
 import com.medsync.patient_service.domain.patient.Patient;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/patients")
@@ -23,19 +25,20 @@ public class PatientController {
         this.service = service;
     }
 
+    // ---------------- SELF-SERVICE ENDPOINTS (PATIENT ROLE) ----------------
+
+    /**
+     * PATIENT registers their profile.
+     * POST /patients
+     */
+
     @PostMapping
     public PatientResponse create(@Valid @RequestBody PatientRequest request,
                                   Authentication authentication) {
 
         Long userId = (Long) authentication.getDetails();
-
-        LocalDate dob = request.getDateOfBirth() != null && !request.getDateOfBirth().isBlank()
-                ? LocalDate.parse(request.getDateOfBirth())
-                : null;
-
-        Gender gender = request.getGender() != null && !request.getGender().isBlank()
-                ? Gender.valueOf(request.getGender().toUpperCase())
-                : Gender.UNKNOWN;
+        LocalDate dob = convertLocalDate(request.getDateOfBirth());
+        Gender gender = convertGender(request.getGender());
 
         PatientCreateCommand cmd = new PatientCreateCommand(
                 userId,
@@ -52,6 +55,22 @@ public class PatientController {
         return toResponse(patient);
     }
 
+    private LocalDate convertLocalDate(String dateOfBirth) {
+        return dateOfBirth != null && !dateOfBirth.isBlank()
+                ? LocalDate.parse(dateOfBirth)
+                : null;
+    }
+
+    private Gender convertGender(String gender) {
+        return gender != null && !gender.isBlank()
+                ? Gender.valueOf(gender.toUpperCase())
+                : Gender.UNKNOWN;
+    }
+
+    /**
+     * PATIENT views their own profile.
+     * GET /patients/me
+     */
     @GetMapping("/me")
     public PatientResponse me(Authentication authentication) {
         Long userId = (Long) authentication.getDetails();
@@ -59,19 +78,18 @@ public class PatientController {
         return toResponse(patient);
     }
 
+    /**
+     * PATIENT updates their own profile.
+     * PUT /patients/me
+     */
     @PutMapping("/me")
     public PatientResponse updateMe(@Valid @RequestBody PatientRequest request,
                                     Authentication authentication) {
 
         Long userId = (Long) authentication.getDetails();
 
-        LocalDate dob = request.getDateOfBirth() != null && !request.getDateOfBirth().isBlank()
-                ? LocalDate.parse(request.getDateOfBirth())
-                : null;
-
-        Gender gender = request.getGender() != null && !request.getGender().isBlank()
-                ? Gender.valueOf(request.getGender().toUpperCase())
-                : Gender.UNKNOWN;
+        LocalDate dob = convertLocalDate(request.getDateOfBirth());
+        Gender gender = convertGender(request.getGender());
 
         PatientUpdateCommand cmd = new PatientUpdateCommand(
                 request.getFullName(),
@@ -101,5 +119,29 @@ public class PatientController {
         response.setCreatedAt(p.getCreatedAt());
         response.setUpdatedAt(p.getUpdatedAt());
         return response;
+    }
+
+    // ---------------- ADMIN ENDPOINTS ----------------
+    /**
+     * ADMIN: get all patients
+     * GET /patients
+     */
+
+    @GetMapping
+    public ResponseEntity<List<PatientResponse>> getAll() {
+        List<Patient> patients = service.getAll();
+        List<PatientResponse> mappedPatients = patients.stream().map(this::toResponse).toList();
+        return ResponseEntity.ok(mappedPatients);
+    }
+
+    /**
+     * ADMIN: get a single patient by id
+     * GET /patients/{id}
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<PatientResponse> getById(@PathVariable Long id) {
+        Patient patient = service.getById(id);
+        PatientResponse response = toResponse(patient);
+        return ResponseEntity.ok(response);
     }
 }

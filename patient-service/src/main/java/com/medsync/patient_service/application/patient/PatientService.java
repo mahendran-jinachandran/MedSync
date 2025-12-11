@@ -8,6 +8,8 @@ import com.medsync.patient_service.domain.patient.PatientRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class PatientService {
 
@@ -53,5 +55,16 @@ public class PatientService {
         patient.updateMedicalInfo(cmd.allergies(), cmd.chronicConditions());
 
         return repository.save(patient);
+    }
+
+    //  ---------------- ADMIN methods ----------------
+    @Transactional(readOnly = true)
+    public List<Patient> getAll() {
+        return repository.getAll();
+    }
+
+    public Patient getById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new PatientNotFoundException(id));
     }
 }

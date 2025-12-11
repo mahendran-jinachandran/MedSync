@@ -6,15 +6,14 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.time.Instant;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
 
     private final JwtProperties properties;
-    private Key key;
+    private final Key key;
 
     public JwtTokenProvider(JwtProperties properties) {
         this.properties = properties;
@@ -26,7 +25,8 @@ public class JwtTokenProvider {
         Instant now = Instant.now();
         Instant expiry = now.plusSeconds(properties.getAccessTokenExpirationSeconds());
 
-        String rolesString = roles.stream().collect(Collectors.joining(","));
+        // store as comma-separated string, e.g. "PATIENT,CLINIC_ADMIN"
+        String rolesString = String.join(",", roles);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
@@ -57,9 +57,37 @@ public class JwtTokenProvider {
     }
 
     public Set<String> getRoles(String token) {
-        String value = getClaims(token).get("roles", String.class);
-        if (value == null || value.isBlank()) return Set.of();
-        return Set.of(value.split(","));
+        Claims claims = getClaims(token);
+        Object raw = claims.get("roles");
+
+        if (raw == null) {
+            return Collections.emptySet();
+        }
+
+        // Case 1: stored as "CLINIC_ADMIN" or "CLINIC_ADMIN,SYSTEM_ADMIN"
+        if (raw instanceof String) {
+            String s = (String) raw;
+            if (s.trim().isEmpty()) {
+                return Collections.emptySet();
+            }
+            return Arrays.stream(s.split(","))
+                    .map(String::trim)
+                    .filter(str -> !str.isEmpty())
+                    .collect(Collectors.toSet());
+        }
+
+        // Case 2: stored as JSON array in future: ["CLINIC_ADMIN", "SYSTEM_ADMIN"]
+        if (raw instanceof Collection) {
+            Collection<?> coll = (Collection<?>) raw;
+            return (Set<String>) coll.stream()
+                    .map(Object::toString)
+                    .map(String::trim)
+                    .filter(str -> !str.isEmpty())
+                    .collect(Collectors.toSet());
+        }
+
+        // Fallback: single non-null value
+        return Collections.singleton(raw.toString().trim());
     }
 
     private Claims getClaims(String token) {
