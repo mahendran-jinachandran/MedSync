@@ -9,9 +9,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "patients", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "user_id")
-})
+@Table(name = "patients",
+        uniqueConstraints = {@UniqueConstraint(columnNames = "user_id")}
+)
 @Getter
 @Setter
 public class PatientEntity {
@@ -23,6 +23,7 @@ public class PatientEntity {
     @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
 
+    @Column(nullable = false)
     private String fullName;
 
     private LocalDate dateOfBirth;

@@ -1,4 +1,4 @@
-# 1. Use official Java runtime (same as auth-service)
+# 1. Use official Java runtime
 FROM eclipse-temurin:22-jdk
 
 # 2. Workdir inside the container

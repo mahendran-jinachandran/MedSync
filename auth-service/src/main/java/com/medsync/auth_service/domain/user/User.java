@@ -36,12 +36,4 @@ public class User {
                 now
         );
     }
-
-    public void addRole(RoleName role) {
-        this.roles.add(role);
-    }
-
-    public void removeRole(RoleName role) {
-        this.roles.remove(role);
-    }
 }

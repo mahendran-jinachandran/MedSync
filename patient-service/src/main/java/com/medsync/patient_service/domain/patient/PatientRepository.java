@@ -13,6 +13,4 @@ public interface PatientRepository {
     Patient save(Patient patient);
 
     List<Patient> getAll();
-
-    Patient getById(Long userId);
 }

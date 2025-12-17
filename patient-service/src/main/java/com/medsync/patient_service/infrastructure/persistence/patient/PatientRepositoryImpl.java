@@ -45,9 +45,4 @@ public class PatientRepositoryImpl implements PatientRepository {
                 .map(PatientMapper::toDomain)
                 .toList();
     }
-
-    @Override
-    public Patient getById(Long userId) {
-        return null;
-    }
 }

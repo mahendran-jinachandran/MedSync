@@ -2,7 +2,6 @@ package com.medsync.patient_service.application.patient;
 
 import com.medsync.patient_service.api.exception.PatientAlreadyExistsException;
 import com.medsync.patient_service.api.exception.PatientNotFoundException;
-import com.medsync.patient_service.domain.patient.Gender;
 import com.medsync.patient_service.domain.patient.Patient;
 import com.medsync.patient_service.domain.patient.PatientRepository;
 import org.springframework.stereotype.Service;
@@ -46,9 +45,9 @@ public class PatientService {
     }
 
     @Transactional
-    public Patient updateForUser(Long userId, PatientUpdateCommand cmd) {
-        Patient patient = repository.findByUserId(userId)
-                .orElseThrow(() -> new PatientNotFoundException(userId));
+    public Patient updateForUser(PatientUpdateCommand cmd) {
+        Patient patient = repository.findByUserId(cmd.userId())
+                .orElseThrow(() -> new PatientNotFoundException(cmd.userId()));
 
         patient.updatePersonalInfo(cmd.fullName(), cmd.dateOfBirth(), cmd.gender());
         patient.updateContactInfo(cmd.phone(), cmd.address());

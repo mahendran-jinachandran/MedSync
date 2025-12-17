@@ -8,6 +8,7 @@ import com.medsync.auth_service.application.auth.AuthService;
 import com.medsync.auth_service.application.auth.LoginCommand;
 import com.medsync.auth_service.application.auth.RegisterCommand;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -24,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterCommand command = new RegisterCommand(
                 request.getEmail(),
                 request.getPassword(),
@@ -32,17 +33,17 @@ public class AuthController {
                 request.getRole()
         );
         AuthResult result = authService.register(command);
-        return toAuthResponse(result);
+        return ResponseEntity.ok(toAuthResponse(result));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginCommand command = new LoginCommand(
                 request.getEmail(),
                 request.getPassword()
         );
         AuthResult result = authService.login(command);
-        return toAuthResponse(result);
+        return ResponseEntity.ok(toAuthResponse(result));
     }
 
     private AuthResponse toAuthResponse(AuthResult result) {

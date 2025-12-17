@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     // IMPORTANT: this will catch JSON/body parsing problems instead of giving HTML
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleNotReadable(HttpMessageNotReadableException ex) {
-        ex.printStackTrace(); // so we see the real reason in the terminal
+        ex.printStackTrace();
         String message = "Invalid request body: " + ex.getMostSpecificCause().getMessage();
         return build(HttpStatus.BAD_REQUEST, message);
     }

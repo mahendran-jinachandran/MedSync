@@ -21,7 +21,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -30,8 +29,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // 1) Public endpoints
-                        .requestMatchers("/actuator/health", "/ping").permitAll()
+                        // 1) Public endpoints - Just to check if the microservice is up and running
+                        .requestMatchers( "/ping").permitAll()
 
                         // 2) PATIENT-only endpoints (these still use hasRole, which is fine)
                         .requestMatchers(HttpMethod.POST, "/patients").hasRole("PATIENT")
@@ -39,10 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/patients/me").hasRole("PATIENT")
 
                         // 3) ADMIN-only endpoints — use hasAnyAuthority with full ROLE_ prefix
-                        .requestMatchers(HttpMethod.GET, "/patients")
-                        .hasAnyAuthority("ROLE_CLINIC_ADMIN", "ROLE_SYSTEM_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/patients/*")
-                        .hasAnyAuthority("ROLE_CLINIC_ADMIN", "ROLE_SYSTEM_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/patients").hasAnyAuthority("ROLE_CLINIC_ADMIN", "ROLE_SYSTEM_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/patients/*").hasAnyAuthority("ROLE_CLINIC_ADMIN", "ROLE_SYSTEM_ADMIN")
 
                         // 4) Everything else needs to be authenticated
                         .anyRequest().authenticated()
