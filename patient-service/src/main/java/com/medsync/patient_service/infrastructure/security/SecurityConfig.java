@@ -29,8 +29,15 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
+
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
                         // 1) Public endpoints - Just to check if the microservice is up and running
-                        .requestMatchers( "/ping").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/patients/ping").permitAll()
 
                         // 2) PATIENT-only endpoints (these still use hasRole, which is fine)
                         .requestMatchers(HttpMethod.POST, "/patients").hasRole("PATIENT")
